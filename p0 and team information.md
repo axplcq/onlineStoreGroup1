@@ -21,9 +21,9 @@ Replace the following information with your team's information. Remember that tw
 - **Team Member Name:** Eric Hedgepeth
   - **Github Username:** EricTheTator
   - **Niner Net ID:** Ehedgepe
-- **Team Member Name:** 
-  - **Github Username:** 
-  - **Niner Net ID:** 
+- **Team Member Name:** Majd Alawar
+  - **Github Username:** malawar1998
+  - **Niner Net ID:** malawar
 
 ## Task 3: Commit and Push Changes
 
