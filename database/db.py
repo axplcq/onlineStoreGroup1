@@ -263,8 +263,8 @@ class Database:
             - None
         """
         self.cursor.execute(
-            "INSERT INTO users (username, password_hash, email, first_name, last_name) VALUES (?, ?, ?, ?, ?)",
-            (username, password_hash, email, first_name, last_name))
+            "INSERT INTO users (username, user_role, password_hash, email, first_name, last_name) VALUES (?, ?, ?, ?, ?)",
+            (username, 'customer',password_hash, email, first_name, last_name))
         self.connection.commit()
 
     # ------ Getter methods ------
@@ -452,6 +452,21 @@ class Database:
         self.cursor.execute(
             "SELECT transaction_id FROM sales WHERE sale_id = ?", (sale_id,))
         return self.cursor.fetchone()
+    
+    def get_user_role_by_username(self, username: str) -> str:
+        """
+        Gets the user role for a user from the database.
+
+        args:
+            - username: The username of the user whose role to get.
+
+        returns:
+            - The user role for the user with the given username.
+        """
+        self.cursor.execute(
+            "SELECT user_role FROM users WHERE username = ?", (username,))
+        result = self.cursor.fetchone()
+        return result['user_role'] if result else None
 
     def get_username_by_sale_id(self, sale_id: int):
         """
