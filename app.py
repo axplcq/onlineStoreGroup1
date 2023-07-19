@@ -103,7 +103,7 @@ def register():
     first_name = request.form['first_name']
     last_name = request.form['last_name']
     salt, key = hash_password(password)
-    update_passwords(username, key, salt)
+    update_passwords(username,password, key, salt)
     db.insert_user(username, key, email, first_name, last_name)
     return render_template('index.html')
 

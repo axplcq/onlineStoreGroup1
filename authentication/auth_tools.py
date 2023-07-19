@@ -1,5 +1,7 @@
 from hashlib import sha512
 import os
+from database.db import Database
+from flask import session
 
 
 def hash_password(password: str, salt: str = None) -> tuple:
@@ -12,7 +14,7 @@ def hash_password(password: str, salt: str = None) -> tuple:
     returns:
         - A tuple of the salt and the hashed password, both as strings.
     """
-    encoded_password = password.encode()
+    encoded_password = password.encode() #encoding into bytes
     if salt is None:
         salt = os.urandom(16).hex()
     key = sha512(encoded_password + salt.encode()).hexdigest()
@@ -21,7 +23,7 @@ def hash_password(password: str, salt: str = None) -> tuple:
 
 def username_exists(username: str) -> bool:
     """
-    Checks if a username exists in the passwords.txt file.
+    Checks if a username exists in the database.
 
     args:
         - username: A string of the username to check.
@@ -30,17 +32,36 @@ def username_exists(username: str) -> bool:
         - True if the username exists, False if not.
     """
 
-    with open("authentication/passwords.txt", "r") as file:
-        lines = file.readlines()
-    for line in lines:
-        if line.split(":")[0] == username:
+    db = Database('database/store_records.db')  
+
+    all_users = db.get_all_user_information()
+    for user in all_users:
+        if user['username'] == username:
+            print(f"Username '{username}' exists.")
             return True
+
+    print(f"Username '{username}' does not exist.")
     return False
 
-
-def update_passwords(username: str, key: str, salt: str):
+def is_admin(username: str) -> bool:
     """
-    Updates the passwords.txt file with a new username and password combination.
+    Checks if the user with the given username is an admin.
+
+    args:
+        - username: A string of the username to check.
+
+    returns:
+        - True if the user is an admin, False otherwise.
+    """
+    db = Database('database/store_records.db')
+    user_role = db.get_user_role_by_username(username)
+
+    return user_role == 'admin'
+
+
+def update_passwords(username: str, password:str, key: str, salt: str):
+    """
+    Updates the database with a new username and password combination.
     If the username is already in the file, the password will be updated.
 
     args:
@@ -55,18 +76,23 @@ def update_passwords(username: str, key: str, salt: str):
         - passwords.txt: Updates an existing or adds a new username and password combination to the file.
     """
 
-    with open("authentication/passwords.txt", "r") as file:
-        lines = file.readlines()
-    with open("authentication/passwords.txt", "w") as file:
-        found_flag = False
-        for line in lines:
-            if line.split(":")[0] == username:
-                found_flag = True
-                file.write(f"{username}:{salt}:{key}")
-            else:
-                file.write(line)
-        if not found_flag:
-            file.write(f"\n{username}:{salt}:{key}")
+    db = Database('database/store_records.db')
+
+    # Hash the password
+    salt, password_hash = hash_password(password)
+
+    # Check if the username exists in the database
+    if db.get_password_hash_by_username(username) is not None:
+        db.set_password_hash(username, password_hash)  # Update the password hash for the existing user
+       # db.set_salt(username, salt)  
+    else:
+        # Get other user information (e.g., email, first name, last name)
+        email = db.get_email_by_username(username)
+        first_name = db.get_first_name_by_username(username)
+        last_name = db.get_last_name_by_username(username)
+
+        # Insert a new user with the provided username, password hash, salt, and other information
+        db.insert_user(username, password_hash, email, first_name, last_name)
 
 
 def check_password(password: str, salt: str, key: str) -> bool:
@@ -101,14 +127,14 @@ def login_pipeline(username: str, password: str) -> bool:
     if not username_exists(username):
         return False
 
-    with open("authentication/passwords.txt", "r") as file:
-        lines = file.readlines()
-    for line in lines:
-        if line.split(":")[0] == username:
-            salt = line.split(":")[1]
-            key = line.split(":")[2]
-            return check_password(password, salt, key)
-    return False
+    db = Database('database/store_records.db')
+    password_hash = db.get_password_hash_by_username(username)
+
+    if password_hash is not None:
+
+        session['username'] = username
+        session['user_role'] = db.get_user_role_by_username(username)
+        return True
 
 
 def main():
