@@ -1,0 +1,10 @@
+@startuml Company_Use_Case_Diagram
+
+actor Company as "Company"
+
+rectangle "Online Store System" {
+  Company --> (Bulk Purchase)
+  Company --> (View Order History)
+}
+
+@enduml

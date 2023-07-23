@@ -1,0 +1,24 @@
+@startuml General_Grocery_Shopping_Sequence_Diagram
+
+actor Customer as "Customer"
+participant "Online Store System" as System
+
+Customer -> System: Search Products
+System -> System: Retrieve Product List
+System -> Customer: Display Product List
+Customer -> System: View Product Details
+System -> System: Retrieve Product Details
+System -> Customer: Display Product Details
+Customer -> System: Add Item to Cart
+System -> System: Update Cart
+System -> Customer: Display Cart
+Customer -> System: Proceed to Checkout
+System -> System: Calculate Total Amount
+System -> Customer: Display Payment Options
+Customer -> System: Make Payment
+System -> System: Process Payment
+System -> System: Update Inventory
+System -> System: Generate Order
+System -> Customer: Display Order Confirmation
+
+@enduml

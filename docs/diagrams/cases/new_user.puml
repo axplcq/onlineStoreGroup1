@@ -1,0 +1,14 @@
+@startuml New_User_Use_Case_Diagram
+
+actor "New User" as NewUser
+
+rectangle "Online Store System" {
+  NewUser --> (Account Registration and Profile Setup)
+  NewUser --> (Search Products)
+  NewUser --> (View Product Details)
+  NewUser --> (Add Item to Cart)
+  NewUser --> (Proceed to Checkout)
+  NewUser --> (Make Payment)
+}
+
+@enduml
