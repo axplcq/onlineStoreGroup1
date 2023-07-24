@@ -1,11 +1,7 @@
 @startuml packages
 set namespaceSeparator none
-package "testing" as testing #aliceblue {
+package "authentication" as authentication #aliceblue {
 }
-package "testing.auth_tests" as testing.auth_tests #aliceblue {
-}
-package "testing.core_tests" as testing.core_tests #aliceblue {
-}
-package "testing.db_tests" as testing.db_tests #aliceblue {
+package "authentication.auth_tools" as authentication.auth_tools #aliceblue {
 }
 @enduml
