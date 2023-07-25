@@ -262,9 +262,10 @@ class Database:
         returns:
             - None
         """
+
         self.cursor.execute(
-            "INSERT INTO users (username, user_role, password_hash, email, first_name, last_name) VALUES (?, ?, ?, ?, ?)",
-            (username, 'customer',password_hash, email, first_name, last_name))
+            "INSERT INTO users (username, user_role, password_hash, email, first_name, last_name) VALUES (?, ?, ?, ?, ?, ?)",
+            (username, 'customer', password_hash, email, first_name, last_name))
         self.connection.commit()
 
     # ------ Getter methods ------
@@ -309,6 +310,20 @@ class Database:
         self.cursor.execute(
             "SELECT email FROM users WHERE username = ?", (username,))
         return self.cursor.fetchone()
+    
+    def get_username_by_email(self, email:str):
+        """
+        Gets the username by the email from database.
+
+        args:
+            - email: The id of the sale whose username to get.
+
+        returns:
+            - The username for the given email.
+        """
+        self.cursor.execute(
+            "SELECT username FROM users WHERE email = ?", (email,))
+        return self.cursor.fetchone()    
 
     def get_first_name_by_username(self, username: str):
         """
@@ -466,7 +481,7 @@ class Database:
         self.cursor.execute(
             "SELECT user_role FROM users WHERE username = ?", (username,))
         result = self.cursor.fetchone()
-        return result['user_role'] if result else None
+        return result
 
     def get_username_by_sale_id(self, sale_id: int):
         """
@@ -481,6 +496,8 @@ class Database:
         self.cursor.execute(
             "SELECT username FROM sales WHERE sale_id = ?", (sale_id,))
         return self.cursor.fetchone()
+    
+    
 
     def get_item_id_by_sale_id(self, sale_id: int):
         """
