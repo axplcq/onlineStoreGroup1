@@ -2,7 +2,76 @@ from hashlib import sha512
 import os
 from database.db import Database
 from flask import session
+from itsdangerous import URLSafeTimedSerializer
+from flask import current_app
 
+def generate_reset_token(email):
+    """
+    Generates a reset token using the 'itsdangerous library'.
+
+    args:
+        - None
+
+    returns:
+        - a 'reset token'
+
+    modifies:
+
+
+    """    
+
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    return serializer.dumps(email)
+
+def validate_reset_token(token, expiration=3600):
+
+    """
+    Validates that the token is valid and not expired.
+
+    args:
+        - token, and set expirtation time
+
+    returns:
+        - None
+
+    modifies:
+
+
+    """    
+
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    try:
+        email = serializer.loads(token, max_age=expiration)
+        return True
+    except:
+        return False
+    
+
+def get_username_from_reset_token(token):
+    """
+    Retrieves the username associated with the reset token
+
+    args:
+        - token
+
+    returns:
+        - Username or none if something is not right with the token
+
+    modifies:
+
+
+    """    
+    
+
+
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    try:
+        db = Database('database/store_records.db')
+        email = serializer.loads(token)
+        useranme = db.get_username_by_email(email)
+        return useranme
+    except:
+        return None
 
 def hash_password(password: str, salt: str = None) -> tuple:
     """
@@ -33,14 +102,32 @@ def username_exists(username: str) -> bool:
     """
 
     db = Database('database/store_records.db')  
-
     all_users = db.get_all_user_information()
+
     for user in all_users:
         if user['username'] == username:
-            print(f"Username '{username}' exists.")
             return True
 
-    print(f"Username '{username}' does not exist.")
+    return False
+
+def email_exists(email: str) -> bool:
+    """
+    Checks if a email exists in the database.
+
+    args:
+        - email: A string of the email to check.
+
+    returns:
+        - True if the email exists, False if not.
+    """
+
+    db = Database('database/store_records.db')  
+    all_users = db.get_all_user_information()
+
+    for user in all_users:
+        if user['email'] == email:
+            return True
+
     return False
 
 def is_admin(username: str) -> bool:
@@ -81,18 +168,18 @@ def update_passwords(username: str, password:str, key: str, salt: str):
     # Hash the password
     salt, password_hash = hash_password(password)
 
-    # Check if the username exists in the database
+    # Checks if the username exists in the database
     if db.get_password_hash_by_username(username) is not None:
         db.set_password_hash(username, password_hash)  # Update the password hash for the existing user
        # db.set_salt(username, salt)  
     else:
-        # Get other user information (e.g., email, first name, last name)
+        # Gets other user information (e.g., email, first name, last name)
         email = db.get_email_by_username(username)
         first_name = db.get_first_name_by_username(username)
         last_name = db.get_last_name_by_username(username)
 
         # Insert a new user with the provided username, password hash, salt, and other information
-        db.insert_user(username, password_hash, email, first_name, last_name)
+      #  db.insert_user(username, password_hash, email, first_name, last_name)
 
 
 def check_password(password: str, salt: str, key: str) -> bool:

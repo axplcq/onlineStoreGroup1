@@ -120,3 +120,9 @@
     margin-bottom: 10px;
     text-align: center;
 }
+
+.alert-custom { /* styles of the 'user_exists' error messages to handle the error messages*/
+    position: relative;
+    padding: 0.75rem 1.25rem 0.75rem 0.75rem;
+}
+

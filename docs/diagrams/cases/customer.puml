@@ -1,4 +1,4 @@
-@startuml customer
+@startuml Customer_Use_Case_Diagram
 left to right direction
 actor Customer
 rectangle "System" as system {
@@ -8,6 +8,8 @@ rectangle "System" as system {
   (View Items)
   (View Orders)
   (View Profile)
+  (Add to Cart)
+  (Bulk Add to Cart)
   (Logout)
 }
 Customer --> (Login)
@@ -16,5 +18,7 @@ Customer --> (View Cart)
 Customer --> (View Items)
 Customer --> (View Orders)
 Customer --> (View Profile)
+Customer --> (Add to Cart)
+Customer --> (Bulk Add to Cart)
 Customer --> (Logout)
 @enduml

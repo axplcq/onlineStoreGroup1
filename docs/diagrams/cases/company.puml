@@ -1,10 +1,24 @@
 @startuml Company_Use_Case_Diagram
-
-actor Company as "Company"
-
-rectangle "Online Store System" {
-  Company --> (Bulk Purchase)
-  Company --> (View Order History)
+left to right direction
+actor Company
+rectangle "System" as system {
+  (Login)
+  (Register)
+  (View Cart)
+  (View Items)
+  (View Orders)
+  (View Profile)
+  (Add to Cart)
+  (Bulk Add to Cart)
+  (Logout)
 }
-
+Company --> (Login)
+Company --> (Register)
+Company --> (View Cart)
+Company --> (View Items)
+Company --> (View Orders)
+Company --> (View Profile)
+Company --> (Add to Cart)
+Company --> (Bulk Add to Cart)
+Company --> (Logout)
 @enduml

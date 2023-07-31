@@ -10,6 +10,7 @@ CREATE TABLE inventory (
 
 CREATE TABLE users (
     username VARCHAR(255) PRIMARY KEY NOT NULL,
+    user_role VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     first_name VARCHAR(255) NOT NULL,

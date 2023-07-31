@@ -1,11 +1,24 @@
 #!/usr/bin/env python3
 
-from authentication.auth_tools import login_pipeline, update_passwords, hash_password
+from authentication.auth_tools import login_pipeline, update_passwords, hash_password,username_exists,email_exists,generate_reset_token, validate_reset_token,get_username_from_reset_token
 from database.db import Database
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for,flash
 from core.session import Sessions
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
+# Configure Flask-Mail for the password change process
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'dannypapish@gmail.com'
+app.config['MAIL_PASSWORD'] = '*******'
+
+mail = Mail(app)
+
+
+app = Flask(__name__)
+app.secret_key = "the_eagle_has_landed"
 HOST, PORT = 'localhost', 8080
 global username, products, db, sessions
 username = 'default'
@@ -58,14 +71,16 @@ def login():
         - sessions: adds a new session to the sessions object
 
     """
+    passed_username = request.args.get('username')
+    passed_password = request.args.get('password')
     username = request.form['username']
     password = request.form['password']
     if login_pipeline(username, password):
         sessions.add_new_session(username, db)
-        return render_template('home.html', products=products, sessions=sessions)
+        return render_template('home.html', products=products, sessions=sessions, passed_username=passed_username, passed_password=passed_password)
     else:
-        print(f"Incorrect username ({username}) or password ({password}).")
-        return render_template('index.html')
+        flash("Username and/or password are incorrect, please try again.", "warning")
+        return redirect(url_for('login_page'))
 
 
 @app.route('/register')
@@ -80,6 +95,8 @@ def register_page():
         - None
     """
     return render_template('register.html')
+  
+
 
 
 @app.route('/register', methods=['POST'])
@@ -94,18 +111,112 @@ def register():
         - None
 
     modifies:
-        - passwords.txt: adds a new username and password combination to the file
+
         - database/store_records.db: adds a new user to the database
+        - passes the username and password that were inputed to the login page
     """
     username = request.form['username']
     password = request.form['password']
     email = request.form['email']
     first_name = request.form['first_name']
     last_name = request.form['last_name']
+
+    # Check if the username already exists
+    if username_exists(username):
+        flash("Username already exists. Please choose a different username.", "warning")
+        return redirect(url_for('register_page'))
+
     salt, key = hash_password(password)
-    update_passwords(username,password, key, salt)
+    update_passwords(username, password, key, salt)
     db.insert_user(username, key, email, first_name, last_name)
-    return render_template('index.html')
+    return render_template('login.html', passed_username=username, passed_password=password)
+
+@app.route('/forgot_password')
+
+def forgot_password_page():
+    """
+    Renders the forgot_password page.
+
+    args:
+        - None
+
+    returns:
+        - The 'forgot_password' page template
+
+    modifies:
+
+
+    """    
+    return render_template('forgot_password.html')
+
+@app.route('/forgot_password', methods=['POST', 'GET'])
+def forgot_password():
+    """
+    Handles the user's request for getting a new password instrad of the forgotten one and sends a 'password change' link to the users
+    email.
+
+    args:
+        - None
+
+    returns:
+        - None
+
+    modifies:
+
+
+    """    
+    email = request.form['email']
+    if email_exists(email):
+        # Generate a reset password link or token and send it to the user's email
+        reset_token = generate_reset_token(email)
+        send_reset_password_email(email, reset_token)  # Calls the function to send the email
+        flash("If your email exists in our system, you will get a link that will allow you to reset your password.", "warning")
+    else:
+        flash("Email not found in our system. Please try again.", "warning")
+    return redirect(url_for('forgot_password'))
+
+
+def send_reset_password_email(email, reset_token):
+    # Send the reset password email using Flask-Mail
+    msg = Message('Password Reset', sender='dannypapish@gmail.com', recipients=[email])
+    msg.body = f'Click the link below to reset your password: {url_for("password_reset", token=reset_token, _external=True)}'
+    mail.send(msg) 
+
+@app.route('/password_reset', methods=['POST'])
+def password_reset():
+    """
+    Takes care of the password reset process.
+
+    args:
+        - None
+
+    returns:
+        - The 'forgot_password' page template
+
+    modifies:
+    Updates the password for the user.
+
+    """        
+    # Retrieve the new password from the form
+    new_password = request.form['password']
+
+    # Retrieve the reset token from the query parameters
+    reset_token = request.args.get('token')
+
+    # Validates the reset token (you'll need to implement this function)
+    if validate_reset_token(reset_token):
+        # Retrieves the username from the reset password link or token
+        username = get_username_from_reset_token(reset_token)
+
+        # Updates the password for the user
+        update_passwords(username, new_password)
+
+        flash("Password reset successful. You can now log in with your new password.", "success")
+        return redirect(url_for('login'))
+    else:
+        flash("Invalid reset token. Please try again.", "danger")
+        return redirect(url_for('forgot_password'))
+        
 
 
 @app.route('/checkout', methods=['POST'])
