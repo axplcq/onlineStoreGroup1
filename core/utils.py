@@ -1,5 +1,6 @@
 import sqlite3
 import uuid
+from flask_mail import Message
 
 
 def dict_factory(cursor: sqlite3.Cursor, row: tuple) -> dict:
@@ -66,3 +67,28 @@ def generate_unique_id() -> str:
         - A unique ID as a string.
     """
     return str(uuid.uuid4())
+
+
+def send_order_confirmation_email(email: str, order_details: dict) -> None:
+    """
+    Sends an order confirmation email to the customer.
+
+    args:
+        - email: The customer's email address.
+        - order_details: A dictionary containing order details.
+
+    returns:
+        - None
+    """
+    # You need to configure Flask-Mail first, as mentioned in the original code
+    msg = Message('Order Confirmation', sender='your_email@gmail.com', recipients=[email])
+    msg.body = f'Your order details:\n'
+    for item, quantity in order_details.items():
+        msg.body += f'{item}: {quantity}\n'
+    # Add more order details like shipping information, total cost, etc.
+    # msg.body += 'Shipping Information: ...\n'
+    # msg.body += f'Total Cost: {total_cost}\n'
+    # ...
+
+    # Send the email
+    mail.send(msg)

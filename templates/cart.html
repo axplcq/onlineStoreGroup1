@@ -1,0 +1,17 @@
+{% for item_id, item in sessions.get_session(username).cart.items() %}
+
+    <div class="cart-item">
+        <h3>{{ item.name }}</h3>
+        <p>Price: ${{ item.price }}</p>
+        <p>Quantity: {{ item.quantity }}</p>
+        <form action="{{ url_for('adjust_quantity') }}" method="post">
+
+            <input type="hidden" name="item_id" value="{{ item_id }}">
+            <input type="number" name="quantity_change" value="0" min="-{{ item.quantity }}" max="100">
+            <button type="submit">Adjust Quantity</button>
+
+        </form>
+        
+    </div>
+
+{% endfor %}
