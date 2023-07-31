@@ -1,3 +1,11 @@
+
 @startuml view_product_info
-<INSERT THE CONTENTS OF view_product_info.puml HERE>
+
+actor Customer
+participant "Majd_Inventory_System" as System
+
+Customer -> System: Request Product Information
+System -> System: Fetch Product Details
+System --> Customer: Product Information
+
 @enduml

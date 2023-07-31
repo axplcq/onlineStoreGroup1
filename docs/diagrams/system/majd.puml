@@ -1,3 +1,15 @@
+
 @startuml majd
-<INSERT THE CONTENTS OF majd.puml HERE>
+
+left to right direction
+actor Customer
+actor Admin
+
+rectangle Majd_Inventory_System {
+  Customer --> (View Product Information)
+  Customer --> (Request Restock)
+  Customer --> (View Order Status)
+  Admin --> (Manage Inventory)
+}
+
 @enduml

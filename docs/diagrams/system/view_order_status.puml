@@ -1,3 +1,11 @@
+
 @startuml view_order_status
-<INSERT THE CONTENTS OF view_order_status.puml HERE>
+
+actor Customer
+participant "Majd_Inventory_System" as System
+
+Customer -> System: View Order Status
+System -> System: Retrieve Order Details
+System --> Customer: Order Status
+
 @enduml

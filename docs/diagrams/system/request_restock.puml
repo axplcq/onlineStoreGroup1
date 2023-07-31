@@ -1,3 +1,11 @@
+
 @startuml request_restock
-<INSERT THE CONTENTS OF request_restock.puml HERE>
+
+actor Customer
+participant "Majd_Inventory_System" as System
+
+Customer -> System: Request Restock
+System -> System: Check Inventory Level
+System --> Customer: Restock Confirmation
+
 @enduml

@@ -1,3 +1,37 @@
+
 @startuml majd_inventory_management
-<INSERT THE CONTENTS OF majd_inventory_management.puml HERE>
+
+!define ENTITY class
+!define FIELD member
+!define METHOD operation
+
+ENTITY Order {
+  FIELD orderId: int
+  FIELD orderDate: Date
+  METHOD getTotal(): double
+}
+
+ENTITY Product {
+  FIELD productId: int
+  FIELD name: string
+  FIELD price: double
+  METHOD getAvailableStock(): int
+}
+
+ENTITY Customer {
+  FIELD customerId: int
+  FIELD name: string
+  METHOD getEmail(): string
+}
+
+ENTITY Inventory {
+  FIELD inventoryId: int
+  FIELD location: string
+  METHOD getStockStatus(): string
+}
+
+Order --|> Product
+Product --|> Inventory
+Customer --|> Order
+
 @enduml
