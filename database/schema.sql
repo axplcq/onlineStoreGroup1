@@ -29,3 +29,4 @@ CREATE TABLE sales (
     FOREIGN KEY (item_id) REFERENCES inventory(id)
 );
 
+

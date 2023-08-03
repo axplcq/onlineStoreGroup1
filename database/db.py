@@ -1,6 +1,7 @@
 from core.utils import dict_factory, calculate_cost
 import datetime as dt
 import sqlite3
+from datetime import datetime
 
 
 class Database:
@@ -268,6 +269,30 @@ class Database:
             (username, 'customer', password_hash, email, first_name, last_name))
         self.connection.commit()
 
+    def insert_login(self, username: str) -> None:
+        """
+        Inserts the logged-in username and login date & time into the log_sessions table..
+
+        args:
+            - username: The username of the user to insert.
+
+        returns:
+            - None
+        """
+        login_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        try:
+            self.cursor.execute(
+                "INSERT INTO log_sessions (username, time_recording) VALUES (?, ?)",
+                (username, login_time)
+            )
+        except sqlite3.IntegrityError:
+            # If the username already exists, adds additional record with a different login time. This is how we avoid 'Integity Error' that makes the app to crash in case it detects a username that already exists in the table.
+            self.cursor.execute(
+                "UPDATE log_sessions SET time_recording = ? WHERE username = ?",
+                (login_time, username)
+            )
+        self.connection.commit()
+
     # ------ Getter methods ------
 
     def get_all_user_information(self):
@@ -282,6 +307,19 @@ class Database:
         """
         self.cursor.execute("SELECT * FROM users")
         return self.cursor.fetchall()
+    
+    def get_all_login_information(self):
+        """
+        Gets all past logged in user information from the database.
+
+        args:
+            - None
+
+        returns:
+            - A list of all user information in the database.
+        """
+        self.cursor.execute("SELECT * FROM log_sessions")
+        return self.cursor.fetchall()    
 
     def get_password_hash_by_username(self, username: str):
         """
@@ -295,6 +333,20 @@ class Database:
         """
         self.cursor.execute(
             "SELECT password_hash FROM users WHERE username = ?", (username,))
+        return self.cursor.fetchone()
+    
+    def get_password_by_username(self, username: str):
+        """
+        Gets the password of a user from the database.
+
+        args:
+            - username: The username of the user whose password hash to get.
+
+        returns:
+            - The password hash for the user with the given username.
+        """
+        self.cursor.execute(
+            "SELECT password FROM users WHERE username = ?", (username,))
         return self.cursor.fetchone()
 
     def get_email_by_username(self, username: str):
@@ -481,7 +533,11 @@ class Database:
         self.cursor.execute(
             "SELECT user_role FROM users WHERE username = ?", (username,))
         result = self.cursor.fetchone()
-        return result
+        if result:
+            return result['user_role']
+        else:
+            return None
+       
 
     def get_username_by_sale_id(self, sale_id: int):
         """

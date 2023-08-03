@@ -18,7 +18,7 @@ mail = Mail(app)
 
 
 app = Flask(__name__)
-app.secret_key = "the_eagle_has_landed"
+app.secret_key = 'the_eagle_has_landed'
 HOST, PORT = 'localhost', 8080
 global username, products, db, sessions
 username = 'default'
@@ -56,10 +56,10 @@ def login_page():
     return render_template('login.html')
 
 
-@app.route('/home', methods=['POST'])
+@app.route('/home', methods=['POST','GET'])
 def login():
     """
-    Renders the home page when the user is at the `/home` endpoint with a POST request.
+    Renders the home page when the user is at the `/home` endpoint with a POST request. Get's the username and password from newly registered user through the register page, and starts a new session. Displays a an error in case it can't find the user un the database through the login_pipeline.
 
     args:
         - None
@@ -99,10 +99,10 @@ def register_page():
 
 
 
-@app.route('/register', methods=['POST'])
+@app.route('/register', methods=['POST', 'GET'])
 def register():
     """
-    Renders the index page when the user is at the `/register` endpoint with a POST request.
+    Renders the login page when if everything went well, displays errors and constraints if there is a problem.
 
     args:
         - None
@@ -127,7 +127,7 @@ def register():
         return redirect(url_for('register_page'))
 
     salt, key = hash_password(password)
-    update_passwords(username, password, key, salt)
+    update_passwords(username, password,salt,key)
     db.insert_user(username, key, email, first_name, last_name)
     return render_template('login.html', passed_username=username, passed_password=password)
 

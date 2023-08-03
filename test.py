@@ -1,16 +1,30 @@
-from testing.auth_tests import test_hash_password_generates_salt, test_salt_length, test_hash_password_returns_given_salt, test_hash_password_uses_given_salt
+from testing.auth_tests import *
 from core.utils import generate_unique_id
 from datetime import datetime
 from testing.db_tests import test_init_db, test_get_inventory_exists, test_dict_factory_link, test_check_connection_threaded
 from testing.core_tests import test_init_sessions, test_add_new_session, test_get_session
 import os
+from flask import Flask
+from itsdangerous import URLSafeTimedSerializer
+
 
 # -------- Testing Function Constants --------
 
-AUTH_FUNCS = [test_hash_password_generates_salt,
-              test_salt_length,
-              test_hash_password_returns_given_salt,
-              test_hash_password_uses_given_salt]
+AUTH_FUNCS = [
+    test_hash_password_generates_salt,
+    test_salt_length,
+    test_hash_password_returns_given_salt,
+    test_hash_password_uses_given_salt,
+    test_generate_reset_token,
+    test_validate_reset_token,
+    test_get_username_from_reset_token,
+    test_username_exists,
+    test_email_exists,
+    test_is_admin,
+    test_update_passwords,
+    test_check_password,
+    test_login_pipeline
+]
 
 DB_FUNCS = [test_init_db, test_get_inventory_exists,
             test_dict_factory_link,
@@ -25,6 +39,8 @@ TESTING_FUNCTIONS = {"core": CORE_FUNCS,
                      "authentication": AUTH_FUNCS}
 
 
+
+
 def run_tests(test_type: str, test_funcs: list, report_file_path: str) -> int:
     """
     Runs all tests for a given set of test functions.
@@ -32,6 +48,7 @@ def run_tests(test_type: str, test_funcs: list, report_file_path: str) -> int:
     args:
         - test_funcs: a list of test functions to run.
         - report_file_path: the path to the report file, where the results of the tests will be written.
+        - serializer: The URLSafeTimedSerializer object.
 
     returns:
         - the number of failed tests as an integer.
@@ -49,7 +66,7 @@ def run_tests(test_type: str, test_funcs: list, report_file_path: str) -> int:
         report_file.write(f"{test_type} tests complete.\n")
         report_file.write(
             f"{len(test_funcs) - failed_tests} out of {len(test_funcs)} tests passed.\n")
-
+    return failed_tests
 
 def create_report_folder() -> str:
     """
@@ -81,7 +98,7 @@ def create_report_file(report_folder_path: str, test_type: str) -> str:
     """
     report_file_path = f"{report_folder_path}/{test_type}_report.txt"
     with open(report_file_path, "w") as report_file:
-        report_file.write(f"Test report for {test_type} tests.\n")
+        report_file.write(f"Test report for {test_type} tests:\n")
     return report_file_path
 
 
@@ -90,9 +107,11 @@ def main() -> None:
     Runs all tests for the application.
     """
     report_folder_path = create_report_folder()
+
     for test_type, test_funcs in TESTING_FUNCTIONS.items():
         report_file_path = create_report_file(report_folder_path, test_type)
         run_tests(test_type, test_funcs, report_file_path)
+
 
 
 if __name__ == "__main__":
