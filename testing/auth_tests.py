@@ -1,7 +1,7 @@
 from authentication.auth_tools import *
 from database.db import *
 from app import app, mail
-from flask import current_app
+from flask import Flask,current_app
 
 
 
@@ -93,7 +93,7 @@ def test_hash_password_uses_given_salt():
     
 def test_generate_reset_token():
     """
-    Tests that the reset token (for forgotten password purposes) is generated properly.
+    Tests that the reset token (for forgotten password purposes) is generated properly. Sense this  functionality is practical only when the app is on a server, we need to create an app_context which is basically simulating a creation of a server with flask.
 
     args:
         - None
@@ -103,42 +103,20 @@ def test_generate_reset_token():
         where the boolean is True if the test passed and False if it failed, 
         and the string is the error report.
     """
-
-    email = 'dannypapish@gmail.com'
-    secret_key = 'the_eagle_has_landed'  
-    token = generate_reset_token(email, secret_key)
-    if not validate_reset_token(token, secret_key, expiration=3600):
-        error = f"Error in test_generate_reset_token: The generated token is invalid.\n  - Token: {token}"
-        return False, error
-    else:
-        return True, "Reset token was generated and is valid."
+    app = Flask(__name__)  # Create a Flask application object
+    app.config['SECRET_KEY'] = 'the_eagle_has_landed'
+    with app.app_context():  # Enter the application context
+        email = 'dannypapish@gmail.com'
+        token = generate_reset_token(email)
+        if not validate_reset_token(token, expiration=3600):
+            error = f"Error in test_generate_reset_token: The generated token is invalid.\n  - Token: {token}"
+            return False, error
+        else:
+            return True, "Reset token was generated and is valid."
 
 def test_validate_reset_token():
     """
-    Tests that the validation of the reset token (for forgotten password purposes).
-
-    args:
-        - None
-
-    returns:
-        - error_report: a tuple containing a boolean and a string, 
-        where the boolean is True if the test passed and False if it failed, 
-        and the string is the error report.
-    """
-
-    email = 'dannypapish@gmail.com'
-    secret_key = 'the_eagle_has_landed'  
-    token = generate_reset_token(email, secret_key)
-    if not validate_reset_token(token, secret_key, expiration=3600):
-        error = f"Error in test_validate_reset_token: The token validation failed.\n  - Token: {token}"
-        return False, error
-    else:
-        return True, "Reset token validation passed."
-
-
-def test_get_username_from_reset_token():
-    """
-    Tests that the get_username_from_reset_token function correctly retrieves the username associated with a valid reset token.
+    Tests that the validation of the reset token (for forgotten password purposes). Sense this  functionality is practical only when the app is on a server, we need to create an app_context which is basically simulating a creation of a server with flask.
 
     args:
         - None
@@ -148,14 +126,43 @@ def test_get_username_from_reset_token():
         where the boolean is True if the test passed and False if it failed,
         and the string is the error report.
     """
-    email = 'dannypapish@gmail.com'
-    token = generate_reset_token(email,secret_key='the_eagle_has_landed')
-    username = get_username_from_reset_token(token,secret_key='the_eagle_has_landed')
-    if not username:
-        error = f"Error in test_get_username_from_reset_token: The username retrieval failed.\n  - Token: {token}"
-        return False, error
-    else:
-        return True, "Username retrieval passed."
+    app = Flask(__name__)  # Create a Flask application object
+    app.config['SECRET_KEY'] = 'the_eagle_has_landed'
+
+    with app.app_context():  # Enter the application context
+        email = 'dannypapish@gmail.com'
+        token = generate_reset_token(email)
+        if not validate_reset_token(token, expiration=3600):
+            error = f"Error in test_validate_reset_token: The token validation failed.\n  - Token: {token}"
+            return False, error
+        else:
+            return True, "Reset token validation passed."
+
+
+def test_get_username_from_reset_token():
+    """
+    Tests that the get_username_from_reset_token function correctly retrieves the username associated with a valid reset token.
+    Sense this  functionality is practical only when the app is on a server, we need to create an app_context which is basically simulating a creation of a server with flask.
+    args:
+        - None
+
+    returns:
+        - error_report: a tuple containing a boolean and a string,
+        where the boolean is True if the test passed and False if it failed,
+        and the string is the error report.
+    """
+    app = Flask(__name__)  # Create a Flask application object
+    app.config['SECRET_KEY'] = 'the_eagle_has_landed'
+
+    with app.app_context():  # Enter the application context
+        email = 'dannypapish@gmail.com'
+        token = generate_reset_token(email)
+        username = get_username_from_reset_token(token)
+        if not username:
+            error = f"Error in test_get_username_from_reset_token: The username retrieval failed.\n  - Token: {token}"
+            return False, error
+        else:
+            return True, "Username retrieval passed."
 
 
 def test_username_exists():
@@ -234,13 +241,22 @@ def test_update_passwords():
     password = '123'
     salt, key = hash_password(password)
 
-    # Updates the password using the update_passwords function with the correct salt and key
-    update_passwords(username, password, salt, key)
+    print("Before update:")
+    print("Password:", password)
+    print("Salt:", salt)
+    print("Key:", key)
 
-    if (db.get_password_hash_by_username(username) != key):
+    update_passwords(username, password, salt, key)
+    updated_password_hash = db.get_password_hash_by_username(username)
+
+    if updated_password_hash == key: # if the updated password hash is same as the initial key, then the functionality failed
+        print("After update:")
+        print("Updated Password Hash: " + updated_password_hash)
+        print("key: " + key)
         return False, "Password update test failed"
 
-    return True, "Password update test passed."
+    return True, "Password update test passed." # else, if they are different, means the password was updated correctly
+
 
 
 def test_check_password():

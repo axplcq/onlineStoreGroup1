@@ -48,24 +48,25 @@ def run_tests(test_type: str, test_funcs: list, report_file_path: str) -> int:
     args:
         - test_funcs: a list of test functions to run.
         - report_file_path: the path to the report file, where the results of the tests will be written.
-        - serializer: The URLSafeTimedSerializer object.
 
     returns:
         - the number of failed tests as an integer.
 
     output:
-        - Prints the results of failed tests.
+        - Writes the return results of the test functions to the report file.
     """
     failed_tests = 0
     with open(report_file_path, "a") as report_file:
+        report_file.write(f"Test report for {test_type} tests:\n")
         for test in test_funcs:
             result, error = test()
+            report_file.write(f"Test '{test.__name__}': {result}\n")
             if not result:
-                report_file.write(f"{error}\n")
+                report_file.write(f"Error: {error}\n")
                 failed_tests += 1
-        report_file.write(f"{test_type} tests complete.\n")
-        report_file.write(
-            f"{len(test_funcs) - failed_tests} out of {len(test_funcs)} tests passed.\n")
+
+        report_file.write("\n")
+        report_file.write(f"{len(test_funcs) - failed_tests} out of {len(test_funcs)} tests passed.\n")
     return failed_tests
 
 def create_report_folder() -> str:

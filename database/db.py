@@ -271,7 +271,7 @@ class Database:
 
     def insert_login(self, username: str) -> None:
         """
-        Inserts the logged-in username and login date & time into the log_sessions table..
+        Inserts the logged-in username and login date & time into the log_sessions table.
 
         args:
             - username: The username of the user to insert.
@@ -329,11 +329,12 @@ class Database:
             - username: The username of the user whose password hash to get.
 
         returns:
-            - The password hash for the user with the given username.
+            - The password hash for the user with the given username, or None if the user is not found.
         """
         self.cursor.execute(
             "SELECT password_hash FROM users WHERE username = ?", (username,))
-        return self.cursor.fetchone()
+        result = self.cursor.fetchone()
+        return result['password_hash'] if result else None
     
     def get_password_by_username(self, username: str):
         """

@@ -59,7 +59,7 @@ def login_page():
 @app.route('/home', methods=['POST','GET'])
 def login():
     """
-    Renders the home page when the user is at the `/home` endpoint with a POST request. Get's the username and password from newly registered user through the register page, and starts a new session. Displays a an error in case it can't find the user un the database through the login_pipeline.
+    Renders the home page when the user is at the `/home` endpoint with a POST request. Get's the username and password from newly registered user through the register page, and starts a new session. Displays a an error using the 'flash' function in case it can't find the user un the database through the login_pipeline.
 
     args:
         - None
@@ -75,8 +75,10 @@ def login():
     passed_password = request.args.get('password')
     username = request.form['username']
     password = request.form['password']
+    db = Database('database/store_records.db')
     if login_pipeline(username, password):
         sessions.add_new_session(username, db)
+        db.insert_login(username)
         return render_template('home.html', products=products, sessions=sessions, passed_username=passed_username, passed_password=passed_password)
     else:
         flash("Username and/or password are incorrect, please try again.", "warning")
@@ -102,7 +104,7 @@ def register_page():
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     """
-    Renders the login page when if everything went well, displays errors and constraints if there is a problem.
+    Renders the login page when if everything went well, Displays errors and constraints using the 'flash' function in case if there is a problem.
 
     args:
         - None
@@ -167,8 +169,8 @@ def forgot_password():
     """    
     email = request.form['email']
     if email_exists(email):
-        # Generate a reset password link or token and send it to the user's email
-        reset_token = generate_reset_token(email)
+        
+        reset_token = generate_reset_token(email) # Generates a reset password link or token and send it to the user's email
         send_reset_password_email(email, reset_token)  # Calls the function to send the email
         flash("If your email exists in our system, you will get a link that will allow you to reset your password.", "warning")
     else:
@@ -178,6 +180,7 @@ def forgot_password():
 
 def send_reset_password_email(email, reset_token):
     # Send the reset password email using Flask-Mail
+
     msg = Message('Password Reset', sender='dannypapish@gmail.com', recipients=[email])
     msg.body = f'Click the link below to reset your password: {url_for("password_reset", token=reset_token, _external=True)}'
     mail.send(msg) 
@@ -197,19 +200,18 @@ def password_reset():
     Updates the password for the user.
 
     """        
-    # Retrieve the new password from the form
-    new_password = request.form['password']
+    
+    new_password = request.form['password'] # Retrieves the new password from the form
 
-    # Retrieve the reset token from the query parameters
-    reset_token = request.args.get('token')
+    reset_token = request.args.get('token') # Retrieves the reset token from the query parameters
 
-    # Validates the reset token (you'll need to implement this function)
-    if validate_reset_token(reset_token):
-        # Retrieves the username from the reset password link or token
-        username = get_username_from_reset_token(reset_token)
+    
+    if validate_reset_token(reset_token): # Validates the reset token
+       
+        username = get_username_from_reset_token(reset_token)  # Retrieves the username from the reset password link or token
 
-        # Updates the password for the user
-        update_passwords(username, new_password)
+        
+        update_passwords(username, new_password) # Updates the password for the user in case everything went fine, displays an error with 'flash' otherwise
 
         flash("Password reset successful. You can now log in with your new password.", "success")
         return redirect(url_for('login'))
