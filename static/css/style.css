@@ -1,9 +1,14 @@
-#index_buttons {
-    padding-top: 15px;
-    margin: 0 auto;
-    width: 250px;
-    height: 125px;
+body {
+    margin: 0;
 }
+
+#index_buttons {
+padding-left:200px;
+padding-top:5px;
+
+}
+
+
 
 #login_button {
     background-color: #4963f4;
@@ -12,9 +17,21 @@
     width: 100px;
     font-weight: bold;
     margin-top: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+    margin-right:20px;
+    padding-right: 20px;
 }
+#logout_button {
+    background-color: #4963f4;
+    border-color: #ccc;
+    color: rgb(236, 236, 236);
+    width: 100px;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left:40px;
 
+}
 #info_row {
     padding-top: 15px;
     margin: 0 auto;
@@ -30,7 +47,7 @@
     width: 100px;
     font-weight: bold;
     margin-top: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 #info_form_group {
@@ -97,7 +114,6 @@
     margin-top: 10px;
     margin-bottom: 10px;
     width: 300px;
-    background-color: #fff9f9;
     border: 1px solid rgb(178, 178, 178);
     height: 50px;
 
@@ -121,8 +137,31 @@
     text-align: center;
 }
 
-.alert-custom { /* styles of the 'user_exists' error messages to handle the error messages*/
+.alert-custom { 
     position: relative;
     padding: 0.75rem 1.25rem 0.75rem 0.75rem;
+}
+
+header {
+    background-color: #3498db; 
+    width: 100%;
+    padding: 10px 0;
+    margin:0 auto;
+}
+
+#navbarNav {
+    margin-left:15%;
+}
+
+.nav-item {
+    margin-top:10px;
+    margin-right: 80px; 
+    margin-left:40px;
+    font-size: 17.5px;
+}
+
+
+.nav-link {
+    color: #fff; /* Set the text color of the links to white */
 }
 

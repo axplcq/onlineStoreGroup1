@@ -7,7 +7,7 @@ from flask import current_app
 
 def generate_reset_token(email):
     """
-    Generates a reset token using the 'itsdangerous library'.
+    Generates a reset token using the 'itsdangerous library' For forgotten password purposes.
 
     args:
         - None
@@ -149,7 +149,7 @@ def is_admin(username: str) -> bool:
 def update_passwords(username: str, password: str, salt: str, key: str):
     """
     Updates the database with a new username and password combination.
-    If the username is already in the file, the password will be updated.
+    If the username is already in the table, the password will be updated.
 
     args:
         - username: A string of the username to store.
@@ -160,13 +160,16 @@ def update_passwords(username: str, password: str, salt: str, key: str):
         - None
 
     modifies:
-        - passwords.txt: Updates an existing or adds a new username and password combination to the file.
+        - Updates an existing or adds a new username and password combination to the database.
     """
 
     db = Database('database/store_records.db')
-    # Hash the new password with a new random salt
+    # Hashs the new password with a new random salt
+
     salt, key = hash_password(password)
+
     # Checks if the username exists in the database
+    
     if db.get_password_hash_by_username(username) is not None:
         db.set_password_hash(username, key)  # Update the password hash for the existing user
     else:

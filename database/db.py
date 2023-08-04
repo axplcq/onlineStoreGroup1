@@ -336,19 +336,6 @@ class Database:
         result = self.cursor.fetchone()
         return result['password_hash'] if result else None
     
-    def get_password_by_username(self, username: str):
-        """
-        Gets the password of a user from the database.
-
-        args:
-            - username: The username of the user whose password hash to get.
-
-        returns:
-            - The password hash for the user with the given username.
-        """
-        self.cursor.execute(
-            "SELECT password FROM users WHERE username = ?", (username,))
-        return self.cursor.fetchone()
 
     def get_email_by_username(self, username: str):
         """

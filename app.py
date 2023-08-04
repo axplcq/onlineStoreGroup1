@@ -2,7 +2,7 @@
 
 from authentication.auth_tools import login_pipeline, update_passwords, hash_password,username_exists,email_exists,generate_reset_token, validate_reset_token,get_username_from_reset_token
 from database.db import Database
-from flask import Flask, render_template, request, redirect, url_for,flash
+from flask import Flask, session,render_template, request, redirect, url_for,flash
 from core.session import Sessions
 from flask_mail import Mail, Message
 
@@ -77,13 +77,34 @@ def login():
     password = request.form['password']
     db = Database('database/store_records.db')
     if login_pipeline(username, password):
+
+        is_logged_in = True #a custom variable that will be passed to the home template to control appearance of specific menu items
         sessions.add_new_session(username, db)
         db.insert_login(username)
-        return render_template('home.html', products=products, sessions=sessions, passed_username=passed_username, passed_password=passed_password)
+        return render_template('home.html', products=products, sessions=sessions, passed_username=username, passed_password=password,is_logged_in=is_logged_in)
+
     else:
         flash("Username and/or password are incorrect, please try again.", "warning")
         return redirect(url_for('login_page'))
 
+@app.route('/logout', methods=['GET'])
+def logout():
+    """
+    Logs out the user from his personal zone to the main index page
+
+    args:
+        - None
+
+    returns:
+        - None
+
+    modifies:
+        - clears all sessions
+
+    """
+    session.clear()
+    return redirect(url_for('index_page'))
+    
 
 @app.route('/register')
 def register_page():
