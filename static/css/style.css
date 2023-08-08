@@ -50,11 +50,6 @@ padding-top:5px;
     margin-bottom: 20px;
 }
 
-#info_form_group {
-    margin-top: 10px;
-    width: 200px;
-}
-
 #product_card {
     margin: 0 auto;
     margin-top: 10px;
@@ -162,9 +157,32 @@ header {
 
 
 .nav-link {
-    color: #fff; 
+    color: #fff;
+    
 }
 
+.table {
+    table-layout: fixed;
+}
+
+.table th,
+.table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table td.info-cell {
+    max-width: 200px;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+a:visited {
+
+    text-decoration: none;
+}
 .custom-btn-width {
     width: 200px;
   }

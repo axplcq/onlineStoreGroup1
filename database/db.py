@@ -82,8 +82,10 @@ class Database:
         returns:
             - The item with the given id.
         """
-        self.cursor.execute("SELECT * FROM inventory WHERE id = ?", (item_id,))
-        return self.cursor.fetchone()
+        self.cursor.execute("SELECT item_name FROM inventory WHERE id = ?", (item_id,))
+        result = self.cursor.fetchone()
+        return result['item_name'] if result else None
+        
 
     def get_item_info_by_id(self, item_id: int):
         """
@@ -97,7 +99,8 @@ class Database:
         """
         self.cursor.execute(
             "SELECT info FROM inventory WHERE id = ?", (item_id,))
-        return self.cursor.fetchone()
+        result = self.cursor.fetchone()
+        return result['info'] if result else None
 
     def get_item_price_by_id(self, item_id: int):
         """
@@ -111,7 +114,8 @@ class Database:
         """
         self.cursor.execute(
             "SELECT price FROM inventory WHERE id = ?", (item_id,))
-        return self.cursor.fetchone()
+        result = self.cursor.fetchone()
+        return result['price'] if result else None
 
     def get_item_stock_by_id(self, item_id: int):
         """
@@ -125,7 +129,8 @@ class Database:
         """
         self.cursor.execute(
             "SELECT stock FROM inventory WHERE id = ?", (item_id,))
-        return self.cursor.fetchone()
+        result = self.cursor.fetchone()
+        return result['stock'] if result else None
 
     def get_item_image_url_by_id(self, item_id: int):
         """
@@ -139,7 +144,8 @@ class Database:
         """
         self.cursor.execute(
             "SELECT image_url FROM inventory WHERE id = ?", (item_id,))
-        return self.cursor.fetchone()
+        result = self.cursor.fetchone()
+        return result['image_url'] if result else None
 
     def get_item_category_by_id(self, item_id: int):
         """
@@ -153,7 +159,8 @@ class Database:
         """
         self.cursor.execute(
             "SELECT category FROM inventory WHERE id = ?", (item_id,))
-        return self.cursor.fetchone()
+        result = self.cursor.fetchone()
+        return result['category'] if result else None
 
     # ------ Setter methods ------
 
@@ -169,7 +176,7 @@ class Database:
             - None
         """
         self.cursor.execute(
-            "UPDATE inventory SET name = ? WHERE id = ?", (new_name, item_id))
+            "UPDATE inventory SET item_name = ? WHERE id = ?", (new_name, item_id))
         self.connection.commit()
 
     def set_item_info(self, item_id: int, new_info: str):
@@ -814,6 +821,8 @@ class Database:
         self.connection.commit()
 
     # ----------------- Admin Functions ----------------
+
+
 
     # Add a new inventory item to the 'inventory' table
     def insert_inventory_item(self, item_name: str, info: str, price: float, stock: int, image_url: str, category: str):

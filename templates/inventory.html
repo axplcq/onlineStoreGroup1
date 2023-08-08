@@ -1,0 +1,69 @@
+{% extends "admin.html" %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+       
+
+            <h1 class="mb-6 d-flex justify-content-center custom-margin-top">Inventory Management</h1>
+
+            <div class="container d-flex justify-content-center align-items-center custom-margin-bottom" style="height: 10vh;">
+                <a class="btn btn-primary custom-btn-width" href="{{ url_for('add_inventory_page') }}">Add a New Item</a>
+            </div>
+
+   
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width:3%">Id</th>
+                    <th>Item Name</th>
+                    <th>Info</th>
+                    <th style="width:5%">Price</th>
+                    <th style="width:5%">Stock</th>
+                    <th>Image URL</th>
+                    <th style="width:8%">Category</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td>{{ product.id }}</td>
+                        <td>{{ product.item_name }}</td>
+                        <td>{{ product.info }}</td>
+                        <td>{{ product.price }}</td>
+                        <td>{{ product.stock }}</td>
+                        <td>{{ product.image_url }}</td>
+                        <td>{{ product.category }}</td>
+                        <td>
+              
+                            <a class="btn btn-success" href="{{ url_for('update_inventory_page', id=product.id) }}">Update</a>
+
+                            <form method="post" action="{{ url_for('delete_inventory_page', id=product.id) }}" style="display: inline;">
+                                <input type="submit" class="btn btn-danger" value="Delete" onclick="return confirm('Are you sure you want to delete this product?')">
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "admin.html" %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Item</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h1 class="card-title text-center mb-4">Add New Item</h1>
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                     
+                        <form action="{{ url_for('add_inventory') }}" method="POST">
+                            <div class="form-group mb-3" id="info_form_group">
+                                <label for="id" class="form-label">id:</label>
+                                <input type="text" name="id" id="id" class="form-control" readonly>
+                            </div>
+
+                            <div class="form-group mb-3" id="info_form_group">
+                                <label for="item_name" class="form-label">Item_Name</label>
+                                <input type="item_name" name="item_name" id="item_name" class="form-control" pattern="^[A-Za-z. ]+$" title="item name should contain only letters" required>
+                            </div>
+
+                            <div class="form-group mb-3" id="info_form_group">
+                                <label for="info" class="form-label">Info:</label>
+                                <input type="text" name="info" id="info" class="form-control" pattern="^[A-Za-z. ]+$" title="info should contain only letters" required>
+                            </div>
+
+                            <div class="form-group mb-3" id="info_form_group">
+                                <label for="price" class="form-label">Price</label>
+                                <input type="number" name="price" id="price" class="form-control" pattern="r'\d+'" title="price should contain only letters" required>
+                            </div>
+
+                            <div class="form-group mb-3" id="info_form_group">
+                                <label for="price" class="form-label">Stock</label>
+                                <input type="number" name="stock" id="stock" class="form-control" pattern="r'\d+'" title="stock should contain only numbers" required>
+                            </div>
+
+                            <div class="form-group mb-3" id="info_form_group">
+                                <label for="image_url" class="form-label">Image URL:</label>
+                                <input type="text" name="image_url" id="image_url" class="form-control" required>
+                            </div>
+                            <div class="form-group mb-4" id="info_form_group">
+                                <label for="category" class="form-label">Category:</label>
+                                <select name="category" id="category" class="form-control" required>
+                                    <option value=""></option>
+                                    <option value="fruits">Fruits</option>
+                                    <option value="vegetables">Vegetables</option>
+                                    <option value="dairy">Dairy</option>
+                                    <option value="meat">Meat</option>
+                                </select>
+                            </div>
+
+
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">Add Item</button>
+                    
+                                <a href="{{ url_for('inventory_page') }}" class="btn btn-secondary">Back to Inventory</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+{% endblock %}
