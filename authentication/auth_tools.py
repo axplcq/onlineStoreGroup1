@@ -4,6 +4,21 @@ from database.db import Database
 from flask import session
 from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
+import random
+import string
+
+def generate_random_password(length=10):
+    """
+    Generates a random password of specified length.
+
+    args:
+        - length: The length of the password to generate. Default is 10.
+
+    returns:
+        - Randomly generated password.
+    """
+    characters = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(random.choice(characters) for _ in range(length))
 
 def generate_reset_token(email):
     """

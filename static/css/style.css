@@ -162,6 +162,16 @@ header {
 
 
 .nav-link {
-    color: #fff; /* Set the text color of the links to white */
+    color: #fff; 
 }
 
+.custom-btn-width {
+    width: 200px;
+  }
+
+.custom-margin-bottom {
+    margin-bottom: 20px; 
+  }
+.custom-margin-top {
+    margin-top:20px;
+}

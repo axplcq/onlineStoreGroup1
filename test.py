@@ -1,4 +1,5 @@
 from testing.auth_tests import *
+from testing.admin_tests import *
 from core.utils import generate_unique_id
 from datetime import datetime
 from testing.db_tests import test_init_db, test_get_inventory_exists, test_dict_factory_link, test_check_connection_threaded
@@ -23,7 +24,8 @@ AUTH_FUNCS = [
     test_is_admin,
     test_update_passwords,
     test_check_password,
-    test_login_pipeline
+    test_login_pipeline,
+    
 ]
 
 DB_FUNCS = [test_init_db, test_get_inventory_exists,
@@ -34,9 +36,17 @@ CORE_FUNCS = [test_init_sessions,
               test_add_new_session,
               test_get_session]
 
+ADMIN_FUNCS = [test_set_password_hash,
+               test_set_email,
+               test_set_first_name,
+               test_set_last_name,
+               test_generate_random_password]
+
 TESTING_FUNCTIONS = {"core": CORE_FUNCS,
                      "database": DB_FUNCS,
-                     "authentication": AUTH_FUNCS}
+                     "authentication": AUTH_FUNCS,
+                     "admin": ADMIN_FUNCS
+                     }
 
 
 

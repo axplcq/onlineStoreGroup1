@@ -1,31 +1,32 @@
 #!/usr/bin/env python3
 
-from authentication.auth_tools import login_pipeline, update_passwords, hash_password,username_exists,email_exists,generate_reset_token, validate_reset_token,get_username_from_reset_token
+from authentication.auth_tools import login_pipeline, update_passwords, hash_password,username_exists,email_exists,generate_reset_token, validate_reset_token,get_username_from_reset_token,generate_random_password
 from database.db import Database
 from flask import Flask, session,render_template, request, redirect, url_for,flash
 from core.session import Sessions
 from flask_mail import Mail, Message
+import logging
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.INFO)
 # Configure Flask-Mail for the password change process
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'dannypapish@gmail.com'
 app.config['MAIL_PASSWORD'] = '*******'
-
 mail = Mail(app)
-
-
-app = Flask(__name__)
 app.secret_key = 'the_eagle_has_landed'
 HOST, PORT = 'localhost', 8080
 global username, products, db, sessions
 username = 'default'
+user_role = 'default'
 db = Database('database/store_records.db')
 products = db.get_full_inventory()
 sessions = Sessions()
-sessions.add_new_session(username, db)
+sessions.add_new_session(username,db)
+
+
 
 
 @app.route('/')
@@ -41,6 +42,18 @@ def index_page():
     """
     return render_template('index.html', username=username, products=products, sessions=sessions)
 
+@app.route('/admin')
+def admin_page():
+    """
+    Renders the login page when the user is at the `/login` endpoint.
+
+    args:
+        - None
+
+    returns:
+        - None
+    """
+    return render_template('admin.html')
 
 @app.route('/login')
 def login_page():
@@ -71,18 +84,26 @@ def login():
         - sessions: adds a new session to the sessions object
 
     """
-    passed_username = request.args.get('username')
-    passed_password = request.args.get('password')
+    #passed_username = request.args.get('username')
+    #passed_password = request.args.get('password')
     username = request.form['username']
     password = request.form['password']
     db = Database('database/store_records.db')
+
     if login_pipeline(username, password):
-
+        current_username = session.get('username')
+        current_role = db.get_user_role_by_username(current_username) #check the role of the currently login user
         is_logged_in = True #a custom variable that will be passed to the home template to control appearance of specific menu items
-        sessions.add_new_session(username, db)
-        db.insert_login(username)
-        return render_template('home.html', products=products, sessions=sessions, passed_username=username, passed_password=password,is_logged_in=is_logged_in)
+        if not current_role=='admin':  # distinct between two cases: 1. the user is an admin - so therfore a different header will be displayed. 2. The user is not an admin, and a regular menu will be displayed. 
 
+            sessions.add_new_session(username, db)
+            db.insert_login(username)
+            return render_template('home.html', products=products, sessions=sessions, passed_username=username, passed_password=password,is_logged_in=is_logged_in)
+        else:
+
+            sessions.add_new_session(username, db)
+            db.insert_login(username)
+            return render_template('admin.html', products=products, sessions=sessions, passed_username=username, passed_password=password,is_logged_in=is_logged_in)
     else:
         flash("Username and/or password are incorrect, please try again.", "warning")
         return redirect(url_for('login_page'))
@@ -105,6 +126,141 @@ def logout():
     session.clear()
     return redirect(url_for('index_page'))
     
+@app.route('/users',methods=['POST', 'GET'])
+def users_page():
+    """
+    Renders the users page for the admin.
+
+    args:
+        - None
+
+    returns:
+        - None
+    """
+    db = Database('database/store_records.db')
+    users = db.get_all_user_information()
+    return render_template('users.html', users=users)
+
+@app.route('/add_user')
+def add_user_page():
+    """
+    Renders the add_user page for the admin.
+
+    args:
+        - None
+
+    returns:
+        - None
+    """
+
+    return render_template('add_user.html')
+
+@app.route('/add_user',methods=['POST', 'GET'])
+def add_user():
+    """
+    Renders the add_user form for the admin.
+
+    args:
+        - None
+
+    modifies:
+        - Adds a new user to the database based on the form input
+
+    returns:
+        - Redirects to the users page after deleting the user.
+    """
+
+    username = request.form['username']
+    first_name = request.form['first_name']
+    last_name = request.form['last_name']
+    email = request.form['email']
+    if username_exists(username):
+        flash("Username already exists. Please choose a different username.", "warning")
+        return redirect(url_for('add_user_page'))
+    if email_exists(email):
+        flash("Email already exists. Please choose a different email.", "warning")
+        return redirect(url_for('add_user_page'))
+    password = generate_random_password()
+    salt, password_hash = hash_password(password)
+    update_passwords(username, password, salt, password_hash)
+    db.insert_user(username, password_hash, email, first_name, last_name)
+    return redirect(url_for('users_page'))
+
+@app.route('/delete_user/<string:username>', methods=['POST', 'GET'])
+def delete_user_page(username):
+    """
+    Renders the delete user page when the user is at the `/delete_user` endpoint.
+
+    args:
+        - username: The username of the user to be deleted.
+
+    modifies:
+        - Deletes a user from the database
+
+    returns:
+        - Redirects to a users page after deleting the user.
+    """
+
+    #user = db.get_user_by_username(username)
+    if request.method == 'POST':
+        # Perform the user deletion process using the delete_user function
+        db.delete_user(username)
+        return redirect(url_for('users_page'))  # Redirect to the admin page after successful deletion
+
+    #return render_template('delete_user.html', user=user)
+
+@app.route('/update_user/<string:username>')
+
+
+def update_user_page(username):
+    """
+    Renders the "update user page" when the admin is at the `/update_user` endpoint.
+
+    args:
+        - username: The username of the user to be updated.
+
+    modifies:
+        - None
+
+    returns:
+        - The update_user page form
+    """
+    user = db.get_user_by_username(username)
+    first_name=db.get_first_name_by_username(username)
+    last_name=db.get_last_name_by_username(username)
+    email=db.get_email_by_username(username)
+
+    return render_template('update_user.html', user=user,first_name=first_name,last_name=last_name,email=email)
+
+
+
+@app.route('/update_user/',methods=['POST', 'GET'])
+def update_user():
+    """
+    Renders the update user page with the details of the specific user pre-filled
+
+    args:
+        - username: The username of the user to be updated.
+
+    modifies:
+        - The admin can modify the user's first, last name and email.
+
+    returns:
+        - Redirects to the users page after updating the user.
+    """
+    
+    username_value = request.form.get('user')
+    username = db.get_user_by_username(username_value)
+    email = request.form['email']
+    first_name=request.form['first_name']
+    last_name=request.form['last_name']
+    db.set_email(username, email)
+    db.set_first_name(username, first_name)
+    db.set_last_name(username, last_name) 
+
+    return redirect(url_for('users_page'))
+    
+
 
 @app.route('/register')
 def register_page():
@@ -144,11 +300,13 @@ def register():
     first_name = request.form['first_name']
     last_name = request.form['last_name']
 
-    # Check if the username already exists
+    # Checks if the username already exists
     if username_exists(username):
         flash("Username already exists. Please choose a different username.", "warning")
         return redirect(url_for('register_page'))
-
+    if email_exists(email):
+        flash("Email already exists. Please choose a different email.", "warning")
+        return redirect(url_for('register'))
     salt, key = hash_password(password)
     update_passwords(username, password,salt,key)
     db.insert_user(username, key, email, first_name, last_name)

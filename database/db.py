@@ -319,7 +319,22 @@ class Database:
             - A list of all user information in the database.
         """
         self.cursor.execute("SELECT * FROM log_sessions")
-        return self.cursor.fetchall()    
+        return self.cursor.fetchall()
+
+    def get_user_by_username(self, username: str):
+        """
+        Gets the the user for the update functionality.
+
+        args:
+            - username: The username of the user to update.
+
+        returns:
+            - The password hash for the user with the given username, or None if the user is not found.
+        """
+        self.cursor.execute(
+            "SELECT username FROM users WHERE username = ?", (username,))
+        result = self.cursor.fetchone()
+        return result['username'] if result else None    
 
     def get_password_hash_by_username(self, username: str):
         """
@@ -349,7 +364,8 @@ class Database:
         """
         self.cursor.execute(
             "SELECT email FROM users WHERE username = ?", (username,))
-        return self.cursor.fetchone()
+        result = self.cursor.fetchone()
+        return result['email'] if result else None
     
     def get_username_by_email(self, email:str):
         """
@@ -363,7 +379,8 @@ class Database:
         """
         self.cursor.execute(
             "SELECT username FROM users WHERE email = ?", (email,))
-        return self.cursor.fetchone()    
+        result = self.cursor.fetchone()
+        return result['username'] if result else None 
 
     def get_first_name_by_username(self, username: str):
         """
@@ -377,7 +394,8 @@ class Database:
         """
         self.cursor.execute(
             "SELECT first_name FROM users WHERE username = ?", (username,))
-        return self.cursor.fetchone()
+        result = self.cursor.fetchone()
+        return result['first_name'] if result else None
 
     def get_last_name_by_username(self, username: str):
         """
@@ -391,7 +409,8 @@ class Database:
         """
         self.cursor.execute(
             "SELECT last_name FROM users WHERE username = ?", (username,))
-        return self.cursor.fetchone()
+        result = self.cursor.fetchone()
+        return result['last_name'] if result else None
 
     # ------ Setter methods ------
 
@@ -520,11 +539,9 @@ class Database:
         """
         self.cursor.execute(
             "SELECT user_role FROM users WHERE username = ?", (username,))
+        
         result = self.cursor.fetchone()
-        if result:
-            return result['user_role']
-        else:
-            return None
+        return result['user_role'] if result else None
        
 
     def get_username_by_sale_id(self, sale_id: int):
@@ -794,4 +811,24 @@ class Database:
 
         self.cursor.execute(
             "UPDATE sales SET cost = ? WHERE id = ?", (new_cost, sale_id))
+        self.connection.commit()
+
+    # ----------------- Admin Functions ----------------
+
+    # Add a new inventory item to the 'inventory' table
+    def insert_inventory_item(self, item_name: str, info: str, price: float, stock: int, image_url: str, category: str):
+        self.cursor.execute(
+            "INSERT INTO inventory (item_name, info, price, stock, image_url, category) VALUES (?, ?, ?, ?, ?, ?)",
+            (item_name, info, price, stock, image_url, category))
+        self.connection.commit()
+
+    # Delete an inventory item from the 'inventory' table by its ID
+    def delete_inventory_item(self, item_id: int):
+        self.cursor.execute("DELETE FROM inventory WHERE id = ?", (item_id,))
+        self.connection.commit()
+
+
+    # Delete a user from the 'users' table by their username
+    def delete_user(self, username: str):
+        self.cursor.execute("DELETE FROM users WHERE username = ?", (username,))
         self.connection.commit()

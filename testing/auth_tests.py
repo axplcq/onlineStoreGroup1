@@ -217,7 +217,9 @@ def test_is_admin():
         where the boolean is True if the test passed and False if it failed,
         and the string is the error report.
     """
+    db = Database('database/store_records.db')
     username = 'aturing'
+    print(db.get_user_role_by_username)
     if not is_admin(username):
         return False, "The user is not an admin"
     
