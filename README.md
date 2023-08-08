@@ -1,4 +1,11 @@
 # Online Store Template
+### Important instructions for activating  
+
+there are a few dependencies and features we added to the app which need to be activated for it to work properly  
+
+- run "pip install Flask-Mail"
+- in the database folder run "create_login_table.py"
+
 
 ## Description
 
