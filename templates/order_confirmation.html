@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h3>Order Confirmation</h3>
+        <hr>
+        {% if first_name %}
+        <p>Thank you, {{ first_name }}! Your order has been placed and will be shipped to the following address:</p>
+        {% else %}
+        <p>Your order has been placed and will be shipped to the following address:</p>
+        {% endif %}
+        <p>{{ street1 }}</p>
+        {% if street2 %}
+        <p>{{ street2 }}</p>
+        {% endif %}
+        <p>{{ city }}, {{ state }}, {{ zip }}</p>
+        <p>Thank you for your purchase!</p>
+    </div>
+</div>
+{% endblock %}

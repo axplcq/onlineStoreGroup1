@@ -1,14 +1,65 @@
 {% extends "layout.html" %}
 
 {% block content %}
-
 <div class="row" id="products_page">
     <div class="col-md-12">
         <h3>Your Order</h3>
         <hr>
         <div class="row">
-            <p>{{ total_cost }} </p>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order %}
+                    <tr>
+                        <td>{{ item.item_name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ item.price }}</td>
+                        <td>${{ item.item_total }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="3" class="text-end">Total:</td>
+                        <td>${{ total_cost }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h3>Select Payment Method</h3>
+        <hr>
+        <form action="{{ url_for('process_payment') }}" method="post">
+            <label>
+                <input type="radio" name="payment_method" value="credit_card" checked>
+                Credit Card
+            </label>
+            <br>
+            <div class="form-group">
+                <label for="card_number">Card Number</label>
+                <input type="text" id="card_number" name="card_number" class="form-control" placeholder="Mock Card Number" required>
+            </div>
+            <div class="form-group">
+                <label for="expiration_date">Expiration Date</label>
+                <input type="text" id="expiration_date" name="expiration_date" class="form-control" placeholder="MM/YY" required>
+            </div>
+            <div class="form-group">
+                <label for="cvv">CVV</label>
+                <input type="text" id="cvv" name="cvv" class="form-control" placeholder="CVV" required>
+            </div>
+			<input type="hidden" name="total_cost" value="{{ total_cost }}">
+            <button type="submit" class="btn btn-primary">Proceed to Payment</button>
+        </form>
+    </div>
+</div>
+
 {% endblock %}
