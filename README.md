@@ -1,4 +1,4 @@
-# Online Store Template
+# Online Store Final submission
 
 ### Instructions for activation  
 
