@@ -11,5 +11,3 @@ to make the app work properly, there are a few things need to be done:
 - We couldn't implement the "forgot password" functionality all the way, since it requires a sender email to send the restore link, and the security settings of the email providers prohibit it. All the tests for it passed though, so it should work in a real world applucation
 
 * The orders section doesn't display the data in the table, couldn't fix it due to lack of time.
-
-* The orders section doesn't display the data in the table, couldn't fix it due to lack of time.
