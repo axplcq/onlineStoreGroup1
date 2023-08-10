@@ -12,3 +12,5 @@ to make the app work properly, there are a few things need to be done:
 
 * The orders section doesn't display the data in the table, couldn't fix it due to lack of time.
 
+* The orders section doesn't display the data in the table, couldn't fix it due to lack of time.
+
