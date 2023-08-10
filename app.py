@@ -6,6 +6,8 @@ from flask import Flask, Markup, session,render_template, request, redirect, url
 from core.session import Sessions
 from flask_mail import Mail, Message
 import logging
+import random
+from datetime import datetime
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -53,6 +55,7 @@ def index_page():
 
 @app.route('/admin')
 def admin_page():
+
     """
     Renders the login page when the user is at the `/login` endpoint.
 
@@ -62,6 +65,10 @@ def admin_page():
     returns:
         - None
     """
+    if 'username' in session:
+        current_username = session['username']
+        is_logged_in = True
+
     return render_template('admin.html')
 
 @app.route('/login')
@@ -134,7 +141,34 @@ def logout():
     """
     session.clear()
     return redirect(url_for('index_page'))
-    
+
+@app.route('/orders')
+
+def orders_page():
+    """
+    Renders the users page for the admin.
+
+    args:
+        - None
+
+    returns:
+        - None
+    """
+    # checks if the user is admin. Otherwise, redirects to login page
+    if 'username' in session:
+        current_username = session['username']
+        is_logged_in = True
+    else:
+        return redirect(url_for('login_page'))
+            
+    db = Database('database/store_records.db')
+    orders = db.get_transactions_by_username(current_username)
+    cost = db.get_cost_by_username(current_username)
+    quantity=db.get_quantity_by_username(current_username)
+    transaction_id=db.get_transaction_id_by_username(current_username)
+    date=db.get_date_by_username(current_username)
+    return render_template('orders.html', orders=orders, username=current_username, passed_username=current_username,is_logged_in=is_logged_in,cost=cost,quantity=quantity,transaction_id=transaction_id,date=date)
+
 @app.route('/users',methods=['POST', 'GET'])
 def users_page():
     """
@@ -146,10 +180,13 @@ def users_page():
     returns:
         - None
     """
-    if 'username' in session:
+    # checks if the user is admin. Otherwise, redirects to login page
+    if 'username' in session and session['username'] == 'aturing':
         current_username = session['username']
         is_logged_in = True
-        
+    else:
+        return redirect(url_for('login_page'))
+            
     db = Database('database/store_records.db')
     users = db.get_all_user_information()
     return render_template('users.html', users=users, username=current_username, passed_username=current_username, is_logged_in=is_logged_in)
@@ -246,12 +283,19 @@ def update_user_page(username):
     returns:
         - The update_user page form
     """
+        # Check if a user is logged in and preserve their information
+    if 'username' in session:
+        current_username = session['username']
+        is_logged_in = True
+    else:
+        current_username = None
+        is_logged_in = False
     user = db.get_user_by_username(username)
     first_name=db.get_first_name_by_username(username)
     last_name=db.get_last_name_by_username(username)
     email=db.get_email_by_username(username)
 
-    return render_template('update_user.html', user=user,first_name=first_name,last_name=last_name,email=email)
+    return render_template('update_user.html', user=user,first_name=first_name,last_name=last_name,email=email,username=current_username, passed_username=current_username, is_logged_in=is_logged_in)
 
 
 
@@ -269,7 +313,8 @@ def update_user():
     returns:
         - Redirects to the users page after updating the user.
     """
-    
+        # Check if a user is logged in and preserve their information
+
     username_value = request.form.get('user')
     username = db.get_user_by_username(username_value)
     email = request.form['email']
@@ -281,7 +326,171 @@ def update_user():
 
     return redirect(url_for('users_page'))
     
+@app.route('/inventory',methods=['POST', 'GET'])
+def inventory_page():
+    """
+    Renders the inventory page for the admin.
 
+    args:
+        - None
+
+    returns:
+        - None
+    """
+        # Check if a user is logged && admin in and preserve their information, otherwise redirecrs it to login page
+    if 'username' in session and session['username'] == 'aturing':
+        current_username = session['username']
+        is_logged_in = True
+    else:
+        return redirect(url_for('login_page'))
+    
+    db = Database('database/store_records.db')
+    products = db.get_full_inventory()
+    return render_template('inventory.html',products=products,username=current_username, passed_username=current_username, is_logged_in=is_logged_in)
+
+@app.route('/add_inventory')
+def add_inventory_page():
+    """
+    Renders the add_inventory page for the admin.
+
+    args:
+        - None
+
+    returns:
+        - None
+    """
+        # Check if a user is logged in and preserve their information
+    if 'username' in session:
+        current_username = session['username']
+        is_logged_in = True
+    else:
+        current_username = None
+        is_logged_in = False
+    return render_template('add_inventory.html',username=current_username, passed_username=current_username, is_logged_in=is_logged_in)
+
+@app.route('/add_inventory',methods=['POST', 'GET'])
+def add_inventory():
+    """
+    Renders the add_inventory form for the admin.
+
+    args:
+        - None
+
+    modifies:
+        - Adds a new user to the database based on the form input
+
+    returns:
+        - Redirects to the users page after deleting the user.
+    """
+        # Check if a user is logged in and preserve their information
+    if 'username' in session:
+        current_username = session['username']
+        is_logged_in = True
+    else:
+        current_username = None
+        is_logged_in = False
+    item_name = request.form['item_name']
+    info = request.form['info']
+    price = request.form['price']
+    stock = request.form['stock']
+    image_url = request.form['image_url']
+    category = request.form['category']
+    db.insert_inventory_item(item_name,info,price,stock,image_url,category)
+
+    return redirect(url_for('inventory_page'))
+
+@app.route('/delete_inventory/<string:id>', methods=['POST', 'GET'])
+def delete_inventory_page(id):
+    """
+    Renders the delete inventory page when the admin is at the `/delete_inventory` endpoint.
+
+    args:
+        - username: The username of the user to be deleted.
+
+    modifies:
+        - Deletes a user from the database
+
+    returns:
+        - Redirects to a users page after deleting the user.
+    """
+
+
+    if request.method == 'POST':
+        # Perform the user deletion process using the delete_user function
+        db.delete_inventory_item(id)
+        return redirect(url_for('inventory_page'))  # Redirect to the admin page after successful deletion
+
+
+
+@app.route('/update_inventory/<string:id>')
+def update_inventory_page(id):
+    """
+    Renders the "update inventory page" when the admin is at the `/update_inventory` endpoint.
+
+    args:
+        - product id: The id of the product to be updated.
+
+    modifies:
+        - None
+
+    returns:
+        - The update_inventory page form
+    """
+        # Check if a user is logged in and preserve their information
+    if 'username' in session:
+        current_username = session['username']
+        is_logged_in = True
+    else:
+        current_username = None
+        is_logged_in = False
+    id = id
+    item_name=db.get_item_name_by_id(id)
+    info=db.get_item_info_by_id(id)
+    price=db.get_item_price_by_id(id)
+    stock=db.get_item_stock_by_id(id)
+    category=db.get_item_category_by_id(id)
+    image_url=db.get_item_image_url_by_id(id)
+    
+
+    return render_template('update_inventory.html', id=id,item_name=item_name,info=info,price=price,stock=stock,category=category, image_url=image_url,username=current_username, passed_username=current_username, is_logged_in=is_logged_in)
+
+
+
+@app.route('/update_inventory',methods=['POST', 'GET'])
+def update_inventory():
+    """
+    Renders the update inventory page with the details of the specific item pre-filled
+
+
+    modifies:
+        - The admin can modify the product details.
+
+    returns:
+        - Redirects to the main inventory page after updating the user.
+    """
+        # Check if a user is logged in and preserve their information
+    if 'username' in session:
+        current_username = session['username']
+        is_logged_in = True
+    else:
+        current_username = None
+        is_logged_in = False
+    id = request.form.get('id')
+    new_item_name = request.form['item_name']
+    new_item_info = request.form['info']
+    new_item_stock = request.form['stock']
+    new_item_price = request.form['price']
+    new_item_category = request.form['category']
+    new_item_image_url = request.form['image_url']
+    db.set_item_name(id,new_item_name)
+    db.set_item_info(id,new_item_info)
+    db.set_item_stock(id,new_item_stock)
+    db.set_item_price(id,new_item_price)
+    db.set_item_category(id,new_item_category)
+    db.set_item_image_url(id,new_item_image_url)
+
+
+    return redirect(url_for('inventory_page'))
 
 @app.route('/register')
 def register_page():
@@ -462,7 +671,12 @@ def checkout():
                 'item_total': item_total,
                 'image_url': product['image_url']
             })
+            transaction_id = random.randint(1000, 100000)
+            item_id = random.randint(1000, 100000)
+            todays_date = datetime.today().date()
             total_cost += item_total
+            db.insert_new_sale(transaction_id, session.get('username'), item_id, quantity, todays_date, total_cost)
+
 
     return render_template('checkout.html', order=order, total_cost=total_cost, passed_username=current_username, is_logged_in=is_logged_in)
 
@@ -557,6 +771,8 @@ def process_order():
         current_username = None
         is_logged_in = False
         first_name = None
+
+    
 
     return render_template('order_confirmation.html', street1=street1, street2=street2, city=city, state=state, zip=zip_code, first_name=first_name, passed_username=current_username, is_logged_in=is_logged_in)
 
