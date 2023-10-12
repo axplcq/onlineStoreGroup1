@@ -37,6 +37,9 @@ def calculate_cost(price: int, quantity: int, discount: float = 0.0, tax_rate: f
     return (price * quantity) * (1 - discount) * (1 + tax_rate)
 
 
+
+
+
 def calculate_total_cost(items: dict) -> float:
     """
     Calculates the total cost of a set of items.
