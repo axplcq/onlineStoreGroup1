@@ -21,6 +21,11 @@ def dict_factory(cursor: sqlite3.Cursor, row: tuple) -> dict:
     return row_dict
 
 
+
+
+
+
+
 def calculate_cost(price: int, quantity: int, discount: float = 0.0, tax_rate: float = 0.05) -> float:
     """
     Calculates the cost of an item.
@@ -35,9 +40,6 @@ def calculate_cost(price: int, quantity: int, discount: float = 0.0, tax_rate: f
         - The cost of the item as a float.
     """
     return (price * quantity) * (1 - discount) * (1 + tax_rate)
-
-
-
 
 
 def calculate_total_cost(items: dict) -> float:
